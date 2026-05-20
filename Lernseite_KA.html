@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KA-Lernseite – GK WKR Modul 2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #121933;
+    --card: #1a2347;
+    --card-2: #232e5c;
+    --text: #e8ecff;
+    --muted: #9aa3c7;
+    --accent: #ff3cac;
+    --accent-2: #784ba0;
+    --accent-3: #2b86c5;
+    --green: #4ade80;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --border: #2a3566;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body {
+    background:
+      radial-gradient(ellipse at top, rgba(120, 75, 160, 0.25), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(43, 134, 197, 0.18), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  header {
+    padding: 28px 24px 8px;
+    text-align: center;
+  }
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  nav.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    padding: 20px 16px 8px;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, var(--bg) 70%, transparent);
+    z-index: 10;
+    backdrop-filter: blur(6px);
+  }
+  .tab {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  }
+  .tab:hover { transform: translateY(-1px); border-color: var(--accent); }
+  .tab.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(255,60,172,0.35);
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 16px 20px 80px; }
+  .panel { display: none; animation: fadeIn .25s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  }
+  .card h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 { font-size: 15px; margin: 12px 0 6px; color: #d6ddff; }
+  .pill {
+    display: inline-block;
+    background: rgba(255,60,172,0.18);
+    color: #ffb3df;
+    border: 1px solid rgba(255,60,172,0.35);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  ul { padding-left: 18px; line-height: 1.6; color: #d6ddff; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  strong { color: #fff; }
+
+  /* Flashcards */
+  .flash-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .flash-controls .progress { color: var(--muted); font-size: 13px; }
+  .flash-deck-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .chip.active { background: linear-gradient(90deg, var(--accent-3), var(--accent-2)); border-color: transparent; }
+  .flashcard {
+    perspective: 1200px;
+    height: 260px;
+    margin: 6px 0 14px;
+  }
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.4,.2,.2,1);
+    cursor: pointer;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, var(--card), var(--card-2));
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .flashcard-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #2b1d4d, #1a2347);
+    font-size: 15px;
+    line-height: 1.55;
+    color: #e8ecff;
+  }
+  .flashcard-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .btn {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: transform .1s ease, opacity .1s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.secondary { background: var(--card-2); border: 1px solid var(--border); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); }
+  .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+  /* Quiz */
+  .quiz-question {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .quiz-question .q-text { font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-option {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease;
+    font-size: 14px;
+  }
+  .quiz-option:hover { border-color: var(--accent-3); }
+  .quiz-option.correct { background: rgba(74, 222, 128, 0.18); border-color: var(--green); color: #c9f7d6; }
+  .quiz-option.wrong { background: rgba(248, 113, 113, 0.18); border-color: var(--red); color: #f9c8c8; }
+  .quiz-option.disabled { cursor: default; }
+  .quiz-feedback {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-3);
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-score {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--card), var(--card-2));
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .quiz-score .score-num { font-size: 36px; font-weight: 800; color: var(--accent); }
+
+  /* Lückentext */
+  .lueckentext { line-height: 2.2; font-size: 15px; }
+  .lueckentext select {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 0 2px;
+  }
+  .lueckentext select.correct { background: rgba(74, 222, 128, 0.25); border-color: var(--green); color: #fff; }
+  .lueckentext select.wrong { background: rgba(248, 113, 113, 0.25); border-color: var(--red); color: #fff; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 24px; margin-top: 8px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-3));
+    border-radius: 2px;
+  }
+  .timeline-item { position: relative; padding-bottom: 18px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(255,60,172,0.2);
+  }
+  .timeline-item .year { font-weight: 800; color: #fff; font-size: 15px; }
+  .timeline-item .title { font-weight: 700; color: #d6ddff; margin: 2px 0; }
+  .timeline-item .desc { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+  /* Operatoren table */
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
+  th { color: #fff; background: var(--card-2); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+  td.op { font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+  /* Chart */
+  .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .chart-wrap h3 { margin: 0 0 12px; color: #fff; }
+  .chart-toggle { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  canvas { max-height: 320px; }
+
+  /* Theme cards grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .theme-card {
+    background: linear-gradient(135deg, var(--card), var(--card-2));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .theme-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .theme-card .emoji { font-size: 26px; margin-bottom: 6px; display: block; }
+  .theme-card .name { font-weight: 700; color: #fff; font-size: 15px; }
+  .theme-card .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KA-Lernseite · GK WKR Modul 2</h1>
+  <div class="subtitle">Strukturwandel · Sozialstaat · Familienpolitik</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="uebersicht">Übersicht</button>
+  <button class="tab" data-tab="karteikarten">Karteikarten</button>
+  <button class="tab" data-tab="quiz">Quiz</button>
+  <button class="tab" data-tab="lueckentext">Lückentext</button>
+  <button class="tab" data-tab="schaubild">Schaubild</button>
+  <button class="tab" data-tab="sozialstaat">Sozialstaat</button>
+  <button class="tab" data-tab="familienpolitik">Familienpolitik</button>
+  <button class="tab" data-tab="operatoren">Operatoren</button>
+</nav>
+
+<main>
+
+  <!-- ÜBERSICHT -->
+  <section class="panel active" id="uebersicht">
+    <div class="card">
+      <h2>Was kommt dran? <span class="pill">KA Plan</span></h2>
+      <p class="muted">Aus deinem Heftblock: <strong>Familienpolitische Maßnahmen</strong> (aus dem letzten Block) + <strong>Strukturwandel</strong> so weit ihr gekommen seid. Format: teilweise Schreibaufgaben nach Operatoren, teilweise Multiple Choice / Lückentext.</p>
+      <div class="grid">
+        <div class="theme-card" data-jump="karteikarten">
+          <span class="emoji">📊</span>
+          <div class="name">Demografischer Wandel</div>
+          <div class="meta">Bevölkerung, Alter, Herkunft</div>
+        </div>
+        <div class="theme-card" data-jump="karteikarten">
+          <span class="emoji">🚚</span>
+          <div class="name">Binnenmigration</div>
+          <div class="meta">Ursachen, Folgen, Bewertung</div>
+        </div>
+        <div class="theme-card" data-jump="schaubild">
+          <span class="emoji">🏭</span>
+          <div class="name">Arbeitsmarkt-Wandel</div>
+          <div class="meta">Sektoren + Stellung im Beruf</div>
+        </div>
+        <div class="theme-card" data-jump="sozialstaat">
+          <span class="emoji">🏛️</span>
+          <div class="name">Sozialstaat</div>
+          <div class="meta">Geschichte, Ziele, Pro/Contra</div>
+        </div>
+        <div class="theme-card" data-jump="familienpolitik">
+          <span class="emoji">👶</span>
+          <div class="name">Familienpolitik</div>
+          <div class="meta">Maßnahmen + Wirkung</div>
+        </div>
+        <div class="theme-card" data-jump="operatoren">
+          <span class="emoji">✍️</span>
+          <div class="name">Operatoren</div>
+          <div class="meta">Was Schreibaufgaben verlangen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Lern-Strategie für heute Abend ⏱️</h2>
+      <ul>
+        <li><strong>20 Min</strong> Karteikarten alle Decks einmal durchgehen → Begriffe sitzen</li>
+        <li><strong>15 Min</strong> Schaubild + Sozialstaat-Timeline anschauen, Trends laut sagen</li>
+        <li><strong>20 Min</strong> Quiz + Lückentext machen (= das Format der KA)</li>
+        <li><strong>10 Min</strong> Operatoren-Tabelle überfliegen, eine eigene Mini-Antwort zu „Beurteilen Sie den demografischen Wandel" formulieren</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- KARTEIKARTEN -->
+  <section class="panel" id="karteikarten">
+    <div class="card">
+      <h2>Karteikarten <span class="pill">Klick = Umdrehen</span></h2>
+      <div class="flash-controls">
+        <div class="flash-deck-picker" id="deckPicker"></div>
+        <div class="progress" id="flashProgress">1 / 1</div>
+      </div>
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+          <div class="flashcard-face flashcard-front" id="flashFront">Lade…</div>
+          <div class="flashcard-face flashcard-back" id="flashBack">Lade…</div>
+        </div>
+      </div>
+      <div class="flashcard-hint">Tipp: Leertaste = umdrehen, Pfeiltasten = vor/zurück</div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn secondary" id="prevCard">← Zurück</button>
+        <button class="btn" id="flipCard">Umdrehen</button>
+        <button class="btn secondary" id="nextCard">Weiter →</button>
+        <button class="btn ghost" id="shuffleCards">🔀 Mischen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel" id="quiz">
+    <div class="card">
+      <h2>Multiple-Choice Quiz <span class="pill">KA Format</span></h2>
+      <div class="quiz-score" id="quizScore">
+        Punktestand: <span class="score-num"><span id="scoreCorrect">0</span> / <span id="scoreTotal">0</span></span>
+        <div class="muted" style="margin-top:6px;">Klick eine Antwort an, dann Begründung lesen.</div>
+      </div>
+      <div id="quizContainer"></div>
+      <div class="row">
+        <button class="btn secondary" id="resetQuiz">🔁 Quiz neu starten</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LÜCKENTEXT -->
+  <section class="panel" id="lueckentext">
+    <div class="card">
+      <h2>Multiple-Choice Lückentext <span class="pill">KA Format</span></h2>
+      <p class="muted">Wähl pro Lücke die richtige Option aus dem Dropdown.</p>
+      <div class="lueckentext" id="lueckentextContainer"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="checkLueckentext">✓ Überprüfen</button>
+        <button class="btn secondary" id="resetLueckentext">🔁 Zurücksetzen</button>
+      </div>
+      <div id="lueckentextResult" class="quiz-feedback" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- SCHAUBILD -->
+  <section class="panel" id="schaubild">
+    <div class="card">
+      <h2>Die Erwerbstätigen 1950–2008 <span class="pill">Schaubild</span></h2>
+      <p class="muted">Quelle: Bergmoser + Höller Verlag (deine PDFs 18b/19). Anteile in %, 1950–87 früheres Bundesgebiet, 2000/08 Deutschland (Mikrozensus).</p>
+    </div>
+    <div class="chart-wrap">
+      <h3>Nach Wirtschaftsbereichen</h3>
+      <canvas id="chartSektoren"></canvas>
+      <p class="muted" style="margin-top:10px;"><strong>Was du sehen sollst:</strong> Tertiärisierung — Land-/Forstwirtschaft und produzierendes Gewerbe gehen massiv zurück, Dienstleistungen explodieren.</p>
+    </div>
+    <div class="chart-wrap">
+      <h3>Nach Stellung im Beruf</h3>
+      <canvas id="chartStellung"></canvas>
+      <p class="muted" style="margin-top:10px;"><strong>Was du sehen sollst:</strong> Beamte/Angestellte verdreifachen ihren Anteil. Arbeiter schrumpfen. Mithelfende Familienangehörige verschwinden fast komplett. Selbstständige bleiben grob konstant.</p>
+    </div>
+  </section>
+
+  <!-- SOZIALSTAAT -->
+  <section class="panel" id="sozialstaat">
+    <div class="card">
+      <h2>Geschichte des Sozialstaats <span class="pill">in Phasen</span></h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="year">vor 1880</div>
+          <div class="title">Vor-Sozialstaatliche Phase</div>
+          <div class="desc">Industrialisierung erzeugt Massenelend (lange Arbeitszeiten, Kinderarbeit, Wohnungsnot). Soziale Sicherung über Familie, Kirche, Armenfürsorge. Arbeiterbewegung formiert sich.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">1883–1889</div>
+          <div class="title">Bismarcks Sozialversicherungen</div>
+          <div class="desc">Krankenversicherung (1883), Unfallversicherung (1884), Renten- & Invaliditätsversicherung (1889). Motiv: Arbeiter ruhigstellen, Sozialdemokratie schwächen („Zuckerbrot und Peitsche").</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">1918–1933</div>
+          <div class="title">Weimarer Republik – Ausbau</div>
+          <div class="desc">Arbeitslosenversicherung (1927), Achtstundentag, soziale Grundrechte in der Verfassung. Weltwirtschaftskrise belastet das System schwer.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">1949–1970er</div>
+          <div class="title">BRD: Soziale Marktwirtschaft + Ausbau</div>
+          <div class="desc">Dynamische Rente (1957), Sozialhilfe (1961), Mitbestimmung. „Wirtschaftswunder" finanziert großzügigen Ausbau.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">1990er–2005</div>
+          <div class="title">Umbau & Einschnitte</div>
+          <div class="desc">Pflegeversicherung (1995) als letzter großer Ausbau. Wiedervereinigung + Globalisierung → Reformdruck. Agenda 2010 / Hartz IV (2005): Zusammenlegung Arbeitslosen- und Sozialhilfe, Aktivierung statt nur Absicherung.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">heute</div>
+          <div class="title">Demografische Herausforderung</div>
+          <div class="desc">Alternde Gesellschaft → Rente, Pflege, Krankenversicherung unter Druck. Debatte: Bürgergeld, Kindergrundsicherung, Rentenalter, Bürgerversicherung.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Pro &amp; Contra: Ausbau vs. Abbau</h2>
+      <div class="grid">
+        <div>
+          <h3 style="color:#4ade80">Pro Ausbau</h3>
+          <ul>
+            <li>Soziale Gerechtigkeit, weniger Ungleichheit</li>
+            <li>Sicherung der Kaufkraft → Konjunktur</li>
+            <li>Sozialer Frieden, Demokratiestabilität</li>
+            <li>Schutz vor Lebensrisiken (Krankheit, Alter, Arbeitslosigkeit)</li>
+            <li>Chancengleichheit (Bildung, Kita)</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:#f87171">Pro Abbau</h3>
+          <ul>
+            <li>Hohe Lohnnebenkosten → schadet Wettbewerbsfähigkeit</li>
+            <li>Beitragslast trifft mittlere Einkommen</li>
+            <li>Eigenverantwortung wird untergraben</li>
+            <li>Demografie macht Finanzierung schwierig</li>
+            <li>„Mitnahmeeffekte" und Fehlanreize</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAMILIENPOLITIK -->
+  <section class="panel" id="familienpolitik">
+    <div class="card">
+      <h2>Familienpolitische Maßnahmen <span class="pill">Wiederholung</span></h2>
+      <p class="muted">Klassisches Schema: <strong>Maßnahme</strong> → <strong>Ziel</strong> → <strong>Bewertung/Wirkung</strong>.</p>
+      <table>
+        <tr><th>Maßnahme</th><th>Ziel</th><th>Wirkung / Kritik</th></tr>
+        <tr>
+          <td><strong>Kindergeld</strong></td>
+          <td>Familien finanziell entlasten, Kinderarmut bekämpfen</td>
+          <td>+ unkompliziert &nbsp;·&nbsp; – wenig Anreiz zu mehr Geburten, Gießkanne</td>
+        </tr>
+        <tr>
+          <td><strong>Elterngeld</strong> (seit 2007)</td>
+          <td>Einkommensersatz nach Geburt, Vereinbarkeit Familie/Beruf, Väterbeteiligung</td>
+          <td>+ Väter nehmen häufiger Elternzeit &nbsp;·&nbsp; – begünstigt Besserverdienende</td>
+        </tr>
+        <tr>
+          <td><strong>Elternzeit</strong></td>
+          <td>Rechtsanspruch auf Auszeit ohne Jobverlust</td>
+          <td>+ Job-Sicherheit &nbsp;·&nbsp; – lange Pausen → Karriere-Knick (oft Mütter)</td>
+        </tr>
+        <tr>
+          <td><strong>Kita-Ausbau / Rechtsanspruch</strong></td>
+          <td>Vereinbarkeit, frühkindliche Bildung, Erwerbstätigkeit (v.a. Mütter) ermöglichen</td>
+          <td>+ erhöht Erwerbsquote von Müttern &nbsp;·&nbsp; – Platzmangel, Fachkräftemangel</td>
+        </tr>
+        <tr>
+          <td><strong>Mutterschutz</strong></td>
+          <td>Gesundheitsschutz Mutter + Kind vor/nach Geburt</td>
+          <td>+ etabliert &nbsp;·&nbsp; – nur für Beschäftigte</td>
+        </tr>
+        <tr>
+          <td><strong>Ehegattensplitting</strong></td>
+          <td>Steuerliche Entlastung Verheirateter</td>
+          <td>– setzt Anreize für Alleinverdiener-Ehe, eher konservatives Familienbild</td>
+        </tr>
+        <tr>
+          <td><strong>Kindergrundsicherung</strong> (Plan)</td>
+          <td>Leistungen bündeln, Kinderarmut wirksamer bekämpfen</td>
+          <td>+ einfacher für Familien &nbsp;·&nbsp; – Umsetzung umstritten</td>
+        </tr>
+        <tr>
+          <td><strong>Steuerliche Freibeträge</strong></td>
+          <td>Kinderfreibetrag, Entlastungsbetrag Alleinerziehende</td>
+          <td>+ wirkt bei höherem Einkommen &nbsp;·&nbsp; – nützt Geringverdienern wenig</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Worauf zielt Familienpolitik?</h2>
+      <ul>
+        <li><strong>Geburtenrate</strong> stabilisieren / erhöhen (gegen demografisches Schrumpfen)</li>
+        <li><strong>Vereinbarkeit</strong> von Familie und Beruf (besonders für Mütter)</li>
+        <li><strong>Kinderarmut</strong> bekämpfen / Chancengleichheit</li>
+        <li><strong>Gleichstellung</strong> von Frauen und Männern in Erwerbs- und Sorgearbeit</li>
+        <li><strong>Bildung</strong> ab früher Kindheit (Kita als Bildungsort)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- OPERATOREN -->
+  <section class="panel" id="operatoren">
+    <div class="card">
+      <h2>Operatoren-Cheatsheet ✍️</h2>
+      <p class="muted">Wenn in der KA „Beurteilen Sie…" steht, müssen <strong>eigene Position + Begründung</strong> rein. „Beschreiben Sie…" heißt: <strong>neutral aus dem Material</strong>. Verwechsle die nicht — dafür gibt's Punktabzug.</p>
+      <table>
+        <tr><th>Operator</th><th>Anforderungs&shy;bereich</th><th>Was du machen musst</th></tr>
+        <tr><td class="op">Nennen / Aufzählen</td><td>I</td><td>Aspekte ohne Erklärung auflisten.</td></tr>
+        <tr><td class="op">Beschreiben</td><td>I</td><td>Material/Schaubild neutral und strukturiert wiedergeben.</td></tr>
+        <tr><td class="op">Herausarbeiten</td><td>II</td><td>Wesentliches aus dem Text filtern und geordnet darstellen.</td></tr>
+        <tr><td class="op">Zusammenfassen</td><td>II</td><td>Kerngedanken komprimiert mit eigenen Worten.</td></tr>
+        <tr><td class="op">Erklären</td><td>II</td><td>Ursache–Wirkung darlegen, Zusammenhänge nachvollziehbar machen.</td></tr>
+        <tr><td class="op">Erläutern</td><td>II</td><td>Wie „erklären" + Beispiele.</td></tr>
+        <tr><td class="op">Einordnen</td><td>II</td><td>Sachverhalt in größeren Kontext stellen.</td></tr>
+        <tr><td class="op">Analysieren</td><td>II–III</td><td>In Bestandteile zerlegen, Beziehungen aufzeigen.</td></tr>
+        <tr><td class="op">Vergleichen</td><td>II–III</td><td>Gemeinsamkeiten <em>und</em> Unterschiede systematisch.</td></tr>
+        <tr><td class="op">Beurteilen</td><td>III</td><td>Eigene begründete Einschätzung auf Basis von Kriterien.</td></tr>
+        <tr><td class="op">Bewerten</td><td>III</td><td>Wie „beurteilen" + persönliche Wertmaßstäbe offenlegen.</td></tr>
+        <tr><td class="op">Diskutieren</td><td>III</td><td>Pro & Contra abwägen, dann begründete Position.</td></tr>
+        <tr><td class="op">Stellung nehmen</td><td>III</td><td>Eigene Meinung mit Argumenten.</td></tr>
+        <tr><td class="op">Entwerfen / Gestalten</td><td>III</td><td>Eigene Lösung/Konzept formulieren.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Mini-Bauplan für eine „Beurteilen Sie…"-Antwort</h2>
+      <ul>
+        <li><strong>Einleitung (1 Satz):</strong> Worum geht's und welche Bewertung kommt.</li>
+        <li><strong>Argumente Pro (2–3):</strong> Mit Beleg aus Material.</li>
+        <li><strong>Argumente Contra (2–3):</strong> Mit Beleg.</li>
+        <li><strong>Abwägung:</strong> Welches Argument wiegt schwerer und warum?</li>
+        <li><strong>Fazit (1–2 Sätze):</strong> Klare Position, kein „weiß nicht".</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>Selbstgebaut für Carlo · viel Erfolg in der KA 🎯</footer>
+
+<script>
+/* ===== TAB NAVIGATION ===== */
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+function switchTab(name) {
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  panels.forEach(p => p.classList.toggle('active', p.id === name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+document.querySelectorAll('[data-jump]').forEach(el => {
+  el.addEventListener('click', () => switchTab(el.dataset.jump));
+});
+
+/* ===== FLASHCARDS ===== */
+const decks = {
+  'Begriffe': [
+    { q: 'Angestellte', a: 'Personen, die überwiegend <strong>geistige Tätigkeiten</strong> ausüben (z.B. kaufmännisch, Büro). Haben Arbeits-/Ausbildungsvertrag.' },
+    { q: 'Arbeiter', a: 'Personen, die überwiegend <strong>körperlich</strong> arbeiten. Unterscheidung zu Angestellten gilt zunehmend als überholt.' },
+    { q: 'Beamte', a: 'Vom Dienstherrn in ein <strong>öffentlich-rechtliches Dienst- und Treueverhältnis</strong> berufen. Auf Lebenszeit, durch Urkunde ernannt. Funktionsvorbehalt (Art. 33 Abs. 4 GG): hoheitliche Aufgaben.' },
+    { q: 'Selbstständige', a: 'Leiten einen Betrieb wirtschaftlich/organisatorisch als <strong>Eigentümer oder Pächter</strong>. Auch Freiberufler und selbstständige Handwerker.' },
+    { q: 'Mithelfende Familienangehörige', a: 'Familienmitglieder, die im Betrieb eines selbstständigen Familienmitglieds mithelfen, <strong>ohne Lohn</strong> und ohne Pflichtbeiträge zur Rentenversicherung.' },
+    { q: 'Dienstleistungen', a: '<strong>Immaterielle Güter</strong>. Typisches Merkmal: Gleichzeitigkeit von Produktion und Verbrauch (z.B. Taxifahrt, Frisör).' },
+    { q: 'Demografischer Wandel', a: 'Veränderung der <strong>Bevölkerungsstruktur</strong>: Gesamteinwohnerzahl, Altersaufbau, Zusammensetzung nach Herkunft.' },
+    { q: 'Binnenmigration', a: 'Wanderungsbewegung <strong>innerhalb</strong> eines Landes (z.B. Land → Stadt, Ost → West).' },
+    { q: 'Strukturwandel', a: 'Langfristige Veränderung der wirtschaftlichen <strong>Struktur</strong> (Anteile der Wirtschaftssektoren, Beschäftigungsformen).' },
+    { q: 'Tertiärisierung', a: 'Verschiebung der Beschäftigung in den <strong>Dienstleistungssektor</strong> (= tertiärer Sektor).' },
+  ],
+  'Demografischer Wandel': [
+    { q: 'Drei Dimensionen des demografischen Wandels?', a: '<strong>1.</strong> Veränderung der Gesamteinwohnerzahl · <strong>2.</strong> Veränderung der Altersstruktur · <strong>3.</strong> Veränderung der Zusammensetzung nach Herkunft.' },
+    { q: 'Entwicklung der Gesamtbevölkerung in Deutschland?', a: 'Zwischen <strong>2003–2011 Rückgang</strong>, zwischen <strong>2011–2022 Wachstum</strong> (vor allem durch Zuwanderung).' },
+    { q: 'Ursachen für die Veränderung der Altersstruktur?', a: '<strong>Niedrige Geburtenrate</strong> + <strong>steigende Lebenserwartung</strong> → mehr Alte, weniger Junge.' },
+    { q: 'Warum nimmt Bevölkerung mit Migrationshintergrund zu?', a: '<strong>Zuwanderung</strong> (Arbeitsmigration, Flucht, EU-Freizügigkeit) plus höhere Geburtenrate in der ersten Generation.' },
+    { q: '4 Auswirkungen des demografischen Wandels?', a: '<strong>Rente</strong> (weniger Beitragszahler) · <strong>Pflege</strong> (mehr Pflegebedürftige) · <strong>Arbeitsmarkt</strong> (Fachkräftemangel) · <strong>Regionen</strong> (Schrumpfung ländlicher Räume, Überlastung Städte).' },
+  ],
+  'Binnenmigration': [
+    { q: '4 Ursachen für Binnenmigration?', a: '<strong>Arbeit</strong> (Jobs in Großstädten) · <strong>Bildung</strong> (Studium) · <strong>Infrastruktur</strong> (besseres Angebot in Städten) · <strong>Lebensqualität</strong> (kulturell, sozial).' },
+    { q: 'Wichtige Wanderungsrichtungen in DE?', a: 'Vor allem <strong>Land → Stadt</strong> und (historisch) <strong>Ost → West</strong>. Aktuell auch Reurbanisierung in Ballungsräume.' },
+    { q: 'Folgen für die Herkunftsregionen?', a: '<strong>Schrumpfung</strong>, Überalterung, schlechtere Infrastruktur (Schulen, Ärzte, ÖPNV), Leerstand, sinkende Steuereinnahmen.' },
+    { q: 'Folgen für die Zielregionen?', a: '<strong>Wohnungsnot</strong>, steigende Mieten, Verkehrsprobleme, Überlastung Infrastruktur — aber auch wirtschaftliche Dynamik.' },
+    { q: 'Politische Eingriffsmöglichkeiten?', a: 'Förderung strukturschwacher Regionen, Breitbandausbau, Homeoffice-Anreize, Mietpreisbremse, Wohnungsbau, Stärkung Mittelstädte.' },
+  ],
+  'Arbeitsmarkt': [
+    { q: 'Was zeigt der Sektorenwandel 1950–2008?', a: '<strong>Tertiärisierung</strong>: Land-/Forstwirtschaft 23% → 2%. Produzierendes Gewerbe 43% → 30%. Dienstleistungen wachsen massiv (von ~34% auf ~68%).' },
+    { q: 'Was zeigt die Veränderung der Stellung im Beruf?', a: '<strong>Beamte/Angestellte</strong> 21% → 61% (verdreifacht). <strong>Arbeiter</strong> 49% → 27%. <strong>Mithelfende Familienangehörige</strong> 15% → unter 1%. Selbstständige relativ konstant.' },
+    { q: 'Warum verschwinden mithelfende Familienangehörige?', a: 'Rückgang familiärer Betriebe (v.a. Landwirtschaft, Handwerk), Individualisierung, Frauen gehen eigener bezahlter Erwerbsarbeit nach.' },
+    { q: 'Was ist der primäre, sekundäre, tertiäre Sektor?', a: '<strong>Primär</strong> = Land-/Forstwirtschaft, Fischerei. <strong>Sekundär</strong> = Produzierendes Gewerbe (Industrie, Handwerk). <strong>Tertiär</strong> = Dienstleistungen.' },
+  ],
+  'Sozialstaat': [
+    { q: 'Wann + was waren Bismarcks Sozialversicherungen?', a: '<strong>1883 Krankenversicherung · 1884 Unfallversicherung · 1889 Renten-/Invaliditätsversicherung.</strong>' },
+    { q: 'Warum führte Bismarck die Sozialversicherungen ein?', a: 'Folgen der <strong>Industrialisierung</strong> (Massenelend), erstarkende Arbeiterbewegung/SPD ruhigstellen → „Zuckerbrot und Peitsche" zusammen mit Sozialistengesetzen.' },
+    { q: 'Wann wurden welche „klassischen 5" Sozialversicherungen ergänzt?', a: '<strong>1927 Arbeitslosenversicherung</strong> · <strong>1995 Pflegeversicherung</strong> (jüngste der 5 Säulen).' },
+    { q: 'Was war die Agenda 2010 / Hartz IV (2005)?', a: 'Zusammenlegung von Arbeitslosen- und Sozialhilfe zum <strong>Arbeitslosengeld II</strong>. Aktivierung („Fördern und Fordern"), niedrigere Lohnersatzleistungen.' },
+    { q: '3 Argumente FÜR Ausbau des Sozialstaats?', a: 'Soziale Gerechtigkeit · Kaufkraft/Konjunkturstabilisierung · Sozialer Frieden + Demokratiestabilität.' },
+    { q: '3 Argumente FÜR Abbau des Sozialstaats?', a: 'Hohe Lohnnebenkosten (Standortwettbewerb) · Demografische Finanzierbarkeit · Eigenverantwortung stärken.' },
+  ],
+  'Familienpolitik': [
+    { q: 'Was ist Elterngeld?', a: 'Lohnersatzleistung nach der Geburt (65–67% des Netto, max. 1.800 €), bis zu <strong>14 Monate</strong> wenn beide Eltern Auszeit nehmen.' },
+    { q: 'Drei Ziele von Familienpolitik?', a: '<strong>Geburtenrate</strong> stabilisieren · <strong>Vereinbarkeit</strong> Familie/Beruf · Bekämpfung <strong>Kinderarmut</strong> + Chancengleichheit.' },
+    { q: 'Kritik am Ehegattensplitting?', a: 'Setzt Anreiz für Alleinverdiener-Ehe (klassisches Familienbild), benachteiligt Doppelverdiener und Alleinerziehende.' },
+    { q: 'Warum ist Kita-Ausbau familienpolitisch wichtig?', a: 'Ermöglicht <strong>Erwerbstätigkeit beider Eltern</strong> (v.a. Mütter), <strong>frühkindliche Bildung</strong>, mehr Chancengleichheit.' },
+    { q: 'Kindergrundsicherung – Idee?', a: 'Bündelung bisheriger Familienleistungen (Kindergeld, Kinderzuschlag, Bildungspaket etc.) in <strong>eine Leistung</strong>, um Kinderarmut wirksamer zu bekämpfen.' },
+  ],
+};
+
+let currentDeck = 'Begriffe';
+let currentIdx = 0;
+const deckPickerEl = document.getElementById('deckPicker');
+Object.keys(decks).forEach(name => {
+  const chip = document.createElement('button');
+  chip.className = 'chip' + (name === currentDeck ? ' active' : '');
+  chip.textContent = name + ' (' + decks[name].length + ')';
+  chip.onclick = () => {
+    currentDeck = name;
+    currentIdx = 0;
+    document.querySelectorAll('#deckPicker .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    renderCard();
+  };
+  deckPickerEl.appendChild(chip);
+});
+const flashcardEl = document.getElementById('flashcard');
+const flashFrontEl = document.getElementById('flashFront');
+const flashBackEl = document.getElementById('flashBack');
+const flashProgressEl = document.getElementById('flashProgress');
+function renderCard() {
+  const deck = decks[currentDeck];
+  const card = deck[currentIdx];
+  flashcardEl.classList.remove('flipped');
+  flashFrontEl.innerHTML = card.q;
+  flashBackEl.innerHTML = card.a;
+  flashProgressEl.textContent = (currentIdx + 1) + ' / ' + deck.length;
+}
+document.getElementById('flipCard').onclick = () => flashcardEl.classList.toggle('flipped');
+flashcardEl.onclick = () => flashcardEl.classList.toggle('flipped');
+document.getElementById('nextCard').onclick = (e) => {
+  e.stopPropagation();
+  currentIdx = (currentIdx + 1) % decks[currentDeck].length;
+  renderCard();
+};
+document.getElementById('prevCard').onclick = (e) => {
+  e.stopPropagation();
+  currentIdx = (currentIdx - 1 + decks[currentDeck].length) % decks[currentDeck].length;
+  renderCard();
+};
+document.getElementById('shuffleCards').onclick = (e) => {
+  e.stopPropagation();
+  const d = decks[currentDeck];
+  for (let i = d.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [d[i], d[j]] = [d[j], d[i]];
+  }
+  currentIdx = 0;
+  renderCard();
+};
+document.addEventListener('keydown', (e) => {
+  const panel = document.querySelector('.panel.active');
+  if (!panel || panel.id !== 'karteikarten') return;
+  if (e.code === 'Space') { e.preventDefault(); flashcardEl.classList.toggle('flipped'); }
+  if (e.code === 'ArrowRight') { document.getElementById('nextCard').click(); }
+  if (e.code === 'ArrowLeft') { document.getElementById('prevCard').click(); }
+});
+renderCard();
+
+/* ===== QUIZ ===== */
+const quizData = [
+  {
+    q: 'Welche der folgenden Veränderungen gehört NICHT zum demografischen Wandel?',
+    options: [
+      'Veränderung der Altersstruktur',
+      'Veränderung der Gesamteinwohnerzahl',
+      'Veränderung der Mietpreise in Großstädten',
+      'Veränderung der Zusammensetzung nach Herkunft'
+    ],
+    correct: 2,
+    explain: 'Mietpreisentwicklung ist eine FOLGE u.a. von Binnenmigration, aber keine Dimension des demografischen Wandels selbst.'
+  },
+  {
+    q: 'Welcher Trend zeigt sich beim Arbeitsmarkt-Strukturwandel 1950–2008?',
+    options: [
+      'Anteil Landwirtschaft wächst',
+      'Anteil Dienstleistungen wächst stark',
+      'Anteil Beamte/Angestellte sinkt',
+      'Anteil Arbeiter wächst'
+    ],
+    correct: 1,
+    explain: 'Tertiärisierung — Dienstleistungen sind der einzige Sektor, der wächst. Beamte/Angestellte verdreifachen ihren Anteil; Arbeiter und Landwirtschaft schrumpfen.'
+  },
+  {
+    q: 'Wann wurden Bismarcks Sozialversicherungen eingeführt?',
+    options: [
+      '1848–1853',
+      '1883–1889',
+      '1918–1924',
+      '1949–1955'
+    ],
+    correct: 1,
+    explain: 'Krankenversicherung 1883, Unfallversicherung 1884, Renten-/Invaliditätsversicherung 1889.'
+  },
+  {
+    q: 'Welche der 5 Sozialversicherungen wurde zuletzt eingeführt?',
+    options: [
+      'Arbeitslosenversicherung',
+      'Krankenversicherung',
+      'Pflegeversicherung',
+      'Rentenversicherung'
+    ],
+    correct: 2,
+    explain: 'Die Pflegeversicherung kam 1995 als 5. Säule dazu. Arbeitslosenversicherung gab es schon seit 1927.'
+  },
+  {
+    q: 'Was ist KEIN typisches Ziel von Familienpolitik?',
+    options: [
+      'Geburtenrate stabilisieren',
+      'Vereinbarkeit Familie/Beruf verbessern',
+      'Senkung der Unternehmenssteuer',
+      'Kinderarmut bekämpfen'
+    ],
+    correct: 2,
+    explain: 'Steuersenkungen für Unternehmen gehören zur Wirtschafts-/Steuerpolitik, nicht zur Familienpolitik.'
+  },
+  {
+    q: 'Was sind „mithelfende Familienangehörige"?',
+    options: [
+      'Familienmitglieder, die im Familienbetrieb ohne Lohn mitarbeiten',
+      'Großeltern, die Enkel betreuen',
+      'Familien, die staatliche Hilfe erhalten',
+      'Pflegende Angehörige mit Pflegegeld'
+    ],
+    correct: 0,
+    explain: 'Definition aus dem Wirtschaftslexikon: mithelfen im Betrieb eines selbstständigen Familienmitglieds, OHNE Lohn und ohne Pflichtbeiträge zur Rentenversicherung.'
+  },
+  {
+    q: 'Welches Motiv hatte Bismarck bei den Sozialversicherungen?',
+    options: [
+      'Reine Nächstenliebe',
+      'EU-Vorgaben erfüllen',
+      'Arbeiter ruhigstellen + SPD schwächen',
+      'Geburtenrate erhöhen'
+    ],
+    correct: 2,
+    explain: '„Zuckerbrot und Peitsche": Sozialversicherungen + Sozialistengesetze sollten die erstarkende Arbeiterbewegung integrieren und entradikalisieren.'
+  },
+  {
+    q: 'Was war zentrale Idee der Agenda 2010 / Hartz IV?',
+    options: [
+      'Erhöhung des Kindergelds',
+      'Zusammenlegung von Arbeitslosen- und Sozialhilfe + Aktivierung',
+      'Einführung der Pflegeversicherung',
+      'Senkung des Rentenalters'
+    ],
+    correct: 1,
+    explain: 'Arbeitslosen- und Sozialhilfe wurden 2005 zum ALG II zusammengelegt. Leitmotiv: „Fördern und Fordern".'
+  },
+  {
+    q: 'Welcher Operator verlangt eine EIGENE begründete Position?',
+    options: [
+      'Beschreiben',
+      'Herausarbeiten',
+      'Zusammenfassen',
+      'Beurteilen'
+    ],
+    correct: 3,
+    explain: 'Beurteilen = Anforderungsbereich III, eigene begründete Einschätzung nach Kriterien. Die anderen sind reproduktiv (I/II).'
+  },
+  {
+    q: 'Welche Aussage zur Binnenmigration stimmt?',
+    options: [
+      'Sie führt nur zu Problemen für die Zielregionen',
+      'Sie betrifft v.a. Bewegungen zwischen Ländern',
+      'Sie kann zu Schrumpfung ländlicher Räume + Wohnungsnot in Städten führen',
+      'Sie wird in Deutschland gesetzlich verboten'
+    ],
+    correct: 2,
+    explain: 'Binnenmigration = WANDERUNG INNERHALB eines Landes. Sie hat Folgen für Herkunfts- UND Zielregionen.'
+  },
+];
+
+const quizContainer = document.getElementById('quizContainer');
+const scoreCorrectEl = document.getElementById('scoreCorrect');
+const scoreTotalEl = document.getElementById('scoreTotal');
+let answeredCount = 0;
+let correctCount = 0;
+
+function renderQuiz() {
+  quizContainer.innerHTML = '';
+  answeredCount = 0;
+  correctCount = 0;
+  scoreCorrectEl.textContent = '0';
+  scoreTotalEl.textContent = quizData.length;
+  quizData.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question';
+    div.innerHTML = `
+      <div class="q-text">${qi + 1}. ${q.q}</div>
+      <div class="quiz-options"></div>
+      <div class="quiz-feedback" id="fb-${qi}">${q.explain}</div>
+    `;
+    const optsEl = div.querySelector('.quiz-options');
+    q.options.forEach((opt, oi) => {
+      const o = document.createElement('div');
+      o.className = 'quiz-option';
+      o.textContent = String.fromCharCode(65 + oi) + ') ' + opt;
+      o.onclick = () => {
+        if (o.classList.contains('disabled')) return;
+        const allOpts = optsEl.querySelectorAll('.quiz-option');
+        allOpts.forEach(x => x.classList.add('disabled'));
+        if (oi === q.correct) {
+          o.classList.add('correct');
+          correctCount++;
+        } else {
+          o.classList.add('wrong');
+          allOpts[q.correct].classList.add('correct');
+        }
+        document.getElementById('fb-' + qi).classList.add('show');
+        answeredCount++;
+        scoreCorrectEl.textContent = correctCount;
+      };
+      optsEl.appendChild(o);
+    });
+    quizContainer.appendChild(div);
+  });
+}
+document.getElementById('resetQuiz').onclick = renderQuiz;
+renderQuiz();
+
+/* ===== LÜCKENTEXT ===== */
+const lueckentextParts = [
+  { text: 'Der ' },
+  { gap: 'demografische Wandel', options: ['demografische Wandel', 'Sozialstaat', 'Strukturwandel', 'Tarifvertrag'] },
+  { text: ' beschreibt Veränderungen der Bevölkerungsstruktur. In Deutschland steigt die ' },
+  { gap: 'Lebenserwartung', options: ['Geburtenrate', 'Lebenserwartung', 'Auswanderungsrate', 'Inflationsrate'] },
+  { text: ', während die ' },
+  { gap: 'Geburtenrate', options: ['Geburtenrate', 'Sterberate', 'Beschäftigungsquote', 'Erwerbsquote'] },
+  { text: ' niedrig ist – daher gibt es immer mehr Alte und weniger Junge. Die Bevölkerung mit ' },
+  { gap: 'Migrationshintergrund', options: ['Migrationshintergrund', 'Hochschulabschluss', 'Wohneigentum', 'Doppelbürgerschaft'] },
+  { text: ' nimmt durch Zuwanderung zu.\n\nAuf dem Arbeitsmarkt findet ein ' },
+  { gap: 'Strukturwandel', options: ['Generationenwandel', 'Wertewandel', 'Strukturwandel', 'Klimawandel'] },
+  { text: ' statt: Der Anteil des primären und sekundären Sektors schrumpft, während der ' },
+  { gap: 'tertiäre', options: ['primäre', 'sekundäre', 'tertiäre', 'quartäre'] },
+  { text: ' Sektor (Dienstleistungen) stark wächst. Bei der Stellung im Beruf wachsen besonders ' },
+  { gap: 'Beamte und Angestellte', options: ['Selbstständige', 'Arbeiter', 'Beamte und Angestellte', 'mithelfende Familienangehörige'] },
+  { text: '.\n\nDer deutsche Sozialstaat geht zurück auf ' },
+  { gap: 'Bismarck', options: ['Adenauer', 'Bismarck', 'Brandt', 'Erhard'] },
+  { text: ', der ab ' },
+  { gap: '1883', options: ['1848', '1871', '1883', '1918'] },
+  { text: ' die ersten Sozialversicherungen einführte. Als jüngste der fünf Säulen kam ' },
+  { gap: '1995', options: ['1957', '1975', '1995', '2005'] },
+  { text: ' die ' },
+  { gap: 'Pflegeversicherung', options: ['Krankenversicherung', 'Unfallversicherung', 'Pflegeversicherung', 'Arbeitslosenversicherung'] },
+  { text: ' dazu. Mit der Agenda 2010 wurden 2005 Arbeitslosen- und Sozialhilfe zum ' },
+  { gap: 'Arbeitslosengeld II', options: ['Bürgergeld', 'Arbeitslosengeld II', 'Wohngeld', 'Kindergeld'] },
+  { text: ' zusammengelegt.' }
+];
+
+const lcEl = document.getElementById('lueckentextContainer');
+function renderLueckentext() {
+  lcEl.innerHTML = '';
+  let gapIdx = 0;
+  lueckentextParts.forEach(part => {
+    if (part.text) {
+      part.text.split('\n').forEach((line, i, arr) => {
+        if (i > 0) lcEl.appendChild(document.createElement('br'));
+        lcEl.appendChild(document.createTextNode(line));
+      });
+    } else if (part.gap) {
+      const sel = document.createElement('select');
+      sel.dataset.gapIdx = gapIdx;
+      sel.dataset.correct = part.gap;
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = '— wähle —';
+      sel.appendChild(blank);
+      // shuffle options
+      const opts = [...part.options].sort(() => Math.random() - 0.5);
+      opts.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt;
+        o.textContent = opt;
+        sel.appendChild(o);
+      });
+      lcEl.appendChild(sel);
+      gapIdx++;
+    }
+  });
+}
+document.getElementById('checkLueckentext').onclick = () => {
+  const selects = lcEl.querySelectorAll('select');
+  let correct = 0;
+  selects.forEach(sel => {
+    sel.classList.remove('correct', 'wrong');
+    if (sel.value === sel.dataset.correct) {
+      sel.classList.add('correct');
+      correct++;
+    } else {
+      sel.classList.add('wrong');
+    }
+  });
+  const res = document.getElementById('lueckentextResult');
+  res.innerHTML = `<strong>Ergebnis:</strong> ${correct} / ${selects.length} richtig.` +
+    (correct === selects.length ? ' 🎯 Perfekt!' : ' Schau dir die rot markierten Lücken noch mal an.');
+  res.classList.add('show');
+};
+document.getElementById('resetLueckentext').onclick = () => {
+  renderLueckentext();
+  document.getElementById('lueckentextResult').classList.remove('show');
+};
+renderLueckentext();
+
+/* ===== CHARTS ===== */
+const years = ['1950', '1961', '1970', '1987', '2000', '2008'];
+const colors = ['#ff3cac', '#784ba0', '#2b86c5', '#4ade80', '#fbbf24'];
+
+const sektorenData = {
+  labels: years,
+  datasets: [
+    { label: 'Land-/Forstwirtschaft, Fischerei', data: [23.3, 13.4, 7.5, 3.2, 2.7, 2.3], backgroundColor: colors[0] },
+    { label: 'Produzierendes Gewerbe', data: [43.0, 48.1, 48.9, 41.8, 33.1, 29.7], backgroundColor: colors[1] },
+    { label: 'Handel und Verkehr', data: [14.4, 17.2, 17.9, 17.7, 23.0, 23.0], backgroundColor: colors[2] },
+    { label: 'Sonstige Dienstleistungen', data: [19.2, 21.3, 25.7, 37.3, 41.2, 45.1], backgroundColor: colors[3] },
+  ]
+};
+const stellungData = {
+  labels: years,
+  datasets: [
+    { label: 'Selbstständige', data: [15.6, 12.1, 9.7, 8.5, 10.0, 10.7], backgroundColor: colors[0] },
+    { label: 'Mithelfende Familienangehörige', data: [14.9, 9.9, 6.3, 1.8, 0.9, 0.9], backgroundColor: colors[1] },
+    { label: 'Beamte und Angestellte', data: [20.6, 30.0, 38.4, 50.1, 54.5, 61.0], backgroundColor: colors[2] },
+    { label: 'Arbeiter/Arbeiterinnen', data: [48.8, 48.0, 45.6, 39.6, 34.6, 27.4], backgroundColor: colors[3] },
+  ]
+};
+const chartOpts = {
+  responsive: true,
+  scales: {
+    x: { ticks: { color: '#9aa3c7' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: {
+      stacked: true,
+      ticks: { color: '#9aa3c7', callback: v => v + '%' },
+      grid: { color: 'rgba(255,255,255,0.05)' },
+      max: 100,
+    }
+  },
+  plugins: {
+    legend: { labels: { color: '#e8ecff', font: { size: 12 } } },
+    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } }
+  }
+};
+const stackedOpts = JSON.parse(JSON.stringify(chartOpts));
+stackedOpts.scales.x.stacked = true;
+stackedOpts.scales.y.stacked = true;
+
+new Chart(document.getElementById('chartSektoren'), {
+  type: 'bar',
+  data: sektorenData,
+  options: stackedOpts
+});
+new Chart(document.getElementById('chartStellung'), {
+  type: 'bar',
+  data: stellungData,
+  options: stackedOpts
+});
+
+</script>
+
+</body>
+</html>
